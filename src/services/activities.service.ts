@@ -49,7 +49,7 @@ export class ActivitiesService {
   //#endregion
 
   //#region 2 updateActivity() method to update (put verb)
-  updateActivity(activityFormData: Activities , id:number): Observable<void> {
+  updateActivity(activityFormData , id:number): Observable<void> {
     console.log("Activity Data from updated ",activityFormData)
     console.log("activty id", id);
     return this.http.put<void>(`${this.endpoint}/id`, activityFormData).pipe(

@@ -14,7 +14,7 @@ export class CrudComponent implements OnInit {
   activityObject: Activities;
   isHiddenSaveActionBtn: boolean;
   isDisabled: boolean;
-  isHiddenActionBtn: boolean;
+  // isHiddenActionBtn: boolean;
   activityId :number;
   isHiddenSaveCreateBtn: boolean;
   isHiddenEditActionBtn: boolean;
@@ -28,33 +28,33 @@ export class CrudComponent implements OnInit {
 
  
   ngOnInit(): void {
-    this.isHiddenActionBtn = true;
     this.isHiddenSaveActionBtn = true;
     this.isHiddenSaveCreateBtn = true;
     this.isHiddenEditActionBtn = true;
-      this.isHiddenCreateActionBtn = true;
-    this.printDataToForm();
+    this.isHiddenCreateActionBtn = false;
+    
     this.activityForm = this.fb.group({
       enName: new FormControl({ value: '', disabled: true }, [Validators.required]),
-      arName: new FormControl({ value: '', disabled: true }, [Validators.required, Validators.email]),
+      arName: new FormControl({ value: '', disabled: true }, [Validators.required]),
       centralAdminArName: new FormControl({ value: '', disabled: true }, [Validators.required]),
-      centralAdminEnName: new FormControl({ value: '', disabled: true }, [Validators.required]),
+      centeralAdminEnName: new FormControl({ value: '', disabled: true }, [Validators.required]),
     });
+
+    this.printDataToForm();
 
   }
   //#region 0 printDataToForm to print data on clcik on each td on the table
   printDataToForm(){
     this.ActivitiesService.getActivitySubject().subscribe(res => {
-      this.isHiddenActionBtn = false;
-      this.isHiddenCreateActionBtn = false;
-    this.isHiddenEditActionBtn = false;
+      this.isHiddenCreateActionBtn = true;
+      this.isHiddenEditActionBtn = false;
       this.activityId = res.activityId
       this.activityForm = this.fb.group({
        
         enName: new FormControl({ value:res.enName, disabled: true }, [Validators.required]),
         arName: new FormControl({ value: res.arName, disabled: true }, [Validators.required]),
         centralAdminArName: new FormControl({ value: res.centralAdminArName, disabled: true }, [Validators.required]),
-        centralAdminEnName: new FormControl({ value: res.centeralAdminEnName, disabled: true }, [Validators.required]),
+        centeralAdminEnName: new FormControl({ value: res.centeralAdminEnName, disabled: true }, [Validators.required]),
       
       });
     });
@@ -62,16 +62,17 @@ export class CrudComponent implements OnInit {
   //#endregion
 //#region showBtns() method to show save and cancel btns on click on update btn
   showBtns(){
-    this.isDisabled = true;
+    // this.isDisabled = true;
     this.isHiddenSaveActionBtn = false;
     this.isHiddenCreateActionBtn = true;
+    this.isHiddenSaveCreateBtn = true;
     this.activityForm.enable();
   }
   //#endregion
 
   //#region showBtns() method to show save and cancel btns on click on update btn
   showCreateSaveBtn(){
-    this.isDisabled = true;
+    // this.isDisabled = true;
     this.isHiddenSaveCreateBtn = false;
     this.isHiddenSaveActionBtn = true;
     this.isHiddenEditActionBtn = true;
@@ -81,9 +82,13 @@ export class CrudComponent implements OnInit {
 
   //#region updateRecord() method to update data of the row in table
   updateRecord() {
-    this.isDisabled = false;
+    // this.isDisabled = false;
     this.ActivitiesService.updateActivity(this.activityForm.value , this.activityId).subscribe(res => {
-     console.log("Activity Updated")
+     console.log("Activity Updated");
+  //    if ( window.confirm('Contract created successfully') ) {
+  //     //clicked Yes
+  //     this.activityForm.reset();
+  //  }
      
     });
 
@@ -91,23 +96,28 @@ export class CrudComponent implements OnInit {
   //#endregion
 
   createActivity(){
-    this.isDisabled = false;
+    // this.isDisabled = false;
     this.ActivitiesService.createActivities(this.activityForm.value).subscribe(res => {
       console.log("Activity Created");
+      this.activityForm.reset();
     })
   }
 
   //#region reset() method
   onReset() {
-    this.isDisabled = true;
-    // this.isHiddenSaveActionBtn = false;
-    this.isHiddenActionBtn = false;
-    this.isHiddenCreateActionBtn = false;
-    this.isHiddenEditActionBtn = false;
-    this.isHiddenSaveCreateBtn = true;
+    // this.isDisabled = true;
+
     this.isHiddenSaveActionBtn = true;
-    this.activityForm.reset();
-    this.activityForm.disable();
+    this.isHiddenSaveCreateBtn = true;
+    this.isHiddenEditActionBtn = true;
+    this.isHiddenCreateActionBtn = false;
+    
+    this.activityForm = this.fb.group({
+      enName: new FormControl({ value: '', disabled: true }, [Validators.required]),
+      arName: new FormControl({ value: '', disabled: true }, [Validators.required]),
+      centralAdminArName: new FormControl({ value: '', disabled: true }, [Validators.required]),
+      centeralAdminEnName: new FormControl({ value: '', disabled: true }, [Validators.required]),
+    });
   }
 
 
