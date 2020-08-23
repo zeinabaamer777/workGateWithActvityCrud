@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, throwError, Subject } from 'rxjs';
+import { Observable, BehaviorSubject, throwError, Subject, pipe } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { Activities } from 'app/model/activities.model';
@@ -14,53 +14,72 @@ export class ActivitiesService {
   activityFormData: Activities;
   private endpoint = environment.apiUrl + '/Activities';
 
-  // private activitesBehaviorSubject = new BehaviorSubject<Activities[]>([]);
-  // private dataStoreActivites: { activites: Activities[] } = { activites: [] };
+  private activitesBehaviorSubject = new BehaviorSubject<Activities[]>([]);
+  private dataStoreActivites: { activites: Activities[] } = { activites: [] };
 
-  // readonly readonlyactivitiesModel = this.activitesBehaviorSubject.asObservable();
+  readonly readonlyactivitiesModel = this.activitesBehaviorSubject.asObservable();
 
   constructor(public http: HttpClient) { }
   // new code model handeling
   // elly mashta5alsh
-  // public getAllActivitesSubject() {
-  //   this.http.get<MainResponse<Activities[]>>(`${this.endpoint}`)
-  //     .subscribe(
-  //       (data: MainResponse<Activities[]>) => {
-  //         this.dataStoreActivites.activites = data.data;
-  //         this.activitesBehaviorSubject.next(Object.assign({}, this.dataStoreActivites).activites);
-  //         return data;
-  //       }
-  //     )
-  // }
+  public getAllActivitesSubject() {
+    this.http.get<Activities[]>(`${this.endpoint}`)
+      .subscribe(
+        (data: Activities[]) => {
+          this.dataStoreActivites.activites = data;
+          this.activitesBehaviorSubject.next(Object.assign({}, this.dataStoreActivites).activites);
+          return data;
+        }
+      )
+  }
 
   //#region 00  getActivities() to read all activites data
    getActivities(): Observable<Activities[]> {
     return this.http.get<Activities[]>(this.endpoint)
   }
+
+  // getActivities()
   //#endregion
 
   //#region 1 addActivities method to add new activity
-   createActivities(activityFormData: Activities): Observable<Activities[]> {
-    return this.http.post<Activities[]>(this.endpoint, activityFormData)
-      .pipe(
-        catchError(this.errorHandler)
-      )
+   createActivities(activityFormData: Activities) {
+     this.http.post<Activities>(this.endpoint, activityFormData)
+      .subscribe((data: Activities) => {
+        this.dataStoreActivites.activites.push(data);
+        this.activitesBehaviorSubject.next(Object.assign({}, this.dataStoreActivites).activites);
+
+        return data;
+      });
+      // .pipe(
+      //   catchError(this.errorHandler)
+      // )
   }
   //#endregion
 
   //#region 2 updateActivity() method to update (put verb)
-  updateActivity(activityFormData , id:number): Observable<void> {
-    console.log("Activity Data from updated ",activityFormData)
-    console.log("activty id", id);
-    return this.http.put<void>(`${this.endpoint}/id`, activityFormData).pipe(
-      catchError(this.errorHandler)
-    )
+  updateActivity( id:number, activity: Activities) {
+    this.http.put<MainResponse<Activities>>(`${this.endpoint}/${id}`, activity)
+    .subscribe(
+       (result: MainResponse<Activities>)=> {
+          let i = 0;
+          for (let activityData of this.dataStoreActivites.activites) {
+            debugger;
+            if (activityData.activityId === result.data.activityId) {
+              this.dataStoreActivites.activites[i] = result.data;
+              break;
+            }
+            i++;
+          }
+          debugger
+          this.activitesBehaviorSubject.next(Object.assign({}, this.dataStoreActivites).activites); 
+      }
+    );
   }
   //#endregion
 
   //#region 3 deleteActivities() to delete Activity
-   deleteActivity(activityId: number): Observable<void> {
-    return this.http.delete<void>(`${this.endpoint}/activityId`).pipe(
+   deleteActivity(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.endpoint}/${id}`).pipe(
       catchError(this.errorHandler)
     )
   }
@@ -99,16 +118,5 @@ export class ActivitiesService {
     this.transferSubject$.next(activityId);
   }
   //#endregion
-
-  //  Old Code
-  // public getActivities(): Observable<object[]>{
-
-  //   return this.http.get<object[]>(`${this.serverUrl}/${this.endpoint}`)
-  //   .pipe(map((res : any) => {
-  //     console.log("API response", res);
-  //     return res;
-  //   }))
-
-  // }
 
 }

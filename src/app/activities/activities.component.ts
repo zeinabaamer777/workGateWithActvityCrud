@@ -13,29 +13,37 @@ export class ActivitiesComponent implements OnInit {
   searchText:string;
 
   activitiesData: Activities[];
+  activities: Observable<Activities[]>;
 
   constructor(private activitiesService: ActivitiesService) { }
 
   ngOnInit() {
     this.getAllActivities();
+    // this.isSave = false;
   }
 
   getAllActivities(){
     this.activitiesService.getActivities().subscribe(res => {
       this.activitiesData = res;
     })
+
+    this.activities = this.activitiesService.readonlyactivitiesModel;
+    this.activitiesService.getAllActivitesSubject();
+
+  }
+
+  deleteActivity(activityId: number){
+    this.activitiesService.deleteActivity(activityId).subscribe(
+      () => {
+        console.log("successfuly deleted")
+        this.getAllActivities()
+      });
+      
   }
 
   //  19/8/2016
   onSelect(selectedActivity: object) {
     this.activitiesService.setActivitySubject(selectedActivity);
 }
-deleteActivity(id: number){
-  this.activitiesService.deleteActivity(id).subscribe(
-    () => {
-      console.log("successfuly deleted")
-      this.getAllActivities()
-    });
-    
-}
+
 }
